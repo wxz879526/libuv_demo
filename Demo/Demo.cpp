@@ -6,18 +6,28 @@
 
 #include "uv.h"
 
+int64_t counter = 0;
+void idle_cb(uv_idle_t *idler)
+{
+	++counter;
+
+	std::cout << "idle callback" << std::endl;
+
+	if (counter >= 10e6)
+		uv_idle_stop(idler);
+}
+
 int main()
 {
-    std::cout << "Hello World!\n";
+	uv_idle_t idler;
 
-	uv_loop_t *loop = (uv_loop_t*)malloc(sizeof(uv_loop_t));
-	uv_loop_init(loop);
+	uv_idle_init(uv_default_loop(), &idler);
+	uv_idle_start(&idler, idle_cb);
+	uv_run(uv_default_loop(), UV_RUN_DEFAULT);
 
-	uv_run(loop, UV_RUN_DEFAULT);
+	uv_loop_close(uv_default_loop());
 
-	uv_loop_close(loop);
-
-	free(loop);
+	return 0;
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
